@@ -3,7 +3,7 @@ package retry
 import (
 	"context"
 	"fmt"
-	"github.com/gozelle/testify/require"
+	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
 )

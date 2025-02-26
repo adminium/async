@@ -1,18 +1,18 @@
 package chunk
 
 import (
-	"github.com/gozelle/testify/require"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestInt64Ranges(t *testing.T) {
-	
+
 	type testCase struct {
 		Nums   []int64
 		Result [][]int64
 		Error  bool
 	}
-	
+
 	testCases := []testCase{
 		{Nums: []int64{0, 0, 3}, Result: [][]int64{{0, 0}}},
 		{Nums: []int64{0, 1, 3}, Result: [][]int64{{0, 1}}},
@@ -26,7 +26,7 @@ func TestInt64Ranges(t *testing.T) {
 		{Nums: []int64{-10, 10, -1}, Error: true},
 		{Nums: []int64{-10, 10, 0}, Error: true},
 	}
-	
+
 	for _, v := range testCases {
 		r, err := SplitInt64s(v.Nums[0], v.Nums[1], v.Nums[2])
 		if v.Error {

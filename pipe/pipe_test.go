@@ -2,7 +2,7 @@ package pipe
 
 import (
 	"context"
-	"github.com/gozelle/testify/require"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 

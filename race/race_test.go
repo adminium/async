@@ -3,8 +3,8 @@ package race_test
 import (
 	"context"
 	"fmt"
-	"github.com/gozelle/async/race"
-	"github.com/gozelle/testify/require"
+	"github.com/adminium/async/race"
+	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
 )
@@ -53,7 +53,7 @@ func TestDelayRace(t *testing.T) {
 			},
 		},
 	}
-	
+
 	r, err := race.Run[int](context.Background(), runners)
 	require.NoError(t, err)
 	require.Equal(t, 1, r)
@@ -86,7 +86,7 @@ func TestRaceError(t *testing.T) {
 			},
 		},
 	}
-	
+
 	_, err := race.Run[int](context.Background(), runners)
 	require.Error(t, err)
 	require.Equal(t, "some error form: 1; some error form: 2; some error form: 3", err.Error())

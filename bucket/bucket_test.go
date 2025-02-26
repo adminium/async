@@ -4,13 +4,13 @@ import (
 	"log"
 	"testing"
 	"time"
-	
-	"github.com/gozelle/async/bucket"
+
+	"github.com/adminium/async/bucket"
 )
 
 func TestBatch(t *testing.T) {
-	
-	b := bucket.NewBucket[int](500, 200*time.Millisecond, func(done <-chan struct{}, data []int) {
+
+	b := bucket.NewBucket[int](500, 200*time.Millisecond, func(data []int) {
 		log.Printf("%d", len(data))
 	})
 	go func() {

@@ -2,7 +2,7 @@ package event
 
 import (
 	"fmt"
-	"github.com/gozelle/testify/require"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 

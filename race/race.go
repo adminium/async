@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/gozelle/async"
-	"github.com/gozelle/async/multierr"
+	"github.com/adminium/async"
+	"github.com/adminium/async/multierr"
 )
 
 type Null = async.Null

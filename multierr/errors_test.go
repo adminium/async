@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gozelle/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestErrors(t *testing.T) {

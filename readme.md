@@ -3,7 +3,7 @@
 ## 安装
 
 ```
-go get -u github.com/gozelle/async
+go get -u github.com/adminium/async
 ```
 
 

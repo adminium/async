@@ -1,7 +1,7 @@
 package collection
 
 import (
-	"github.com/gozelle/async/generics"
+	"github.com/adminium/async/generics"
 	"sort"
 )
 

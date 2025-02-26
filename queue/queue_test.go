@@ -1,13 +1,13 @@
 package queue
 
 import (
-	"github.com/gozelle/testify/require"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestQueueSimple(t *testing.T) {
 	q := New()
-	
+
 	for i := 0; i < minQueueLen; i++ {
 		q.Add(i)
 	}
@@ -24,7 +24,7 @@ func TestQueueSimple(t *testing.T) {
 
 func TestQueueWrapping(t *testing.T) {
 	q := New()
-	
+
 	for i := 0; i < minQueueLen; i++ {
 		q.Add(i)
 	}
@@ -32,7 +32,7 @@ func TestQueueWrapping(t *testing.T) {
 		q.Remove()
 		q.Add(minQueueLen + i)
 	}
-	
+
 	for i := 0; i < minQueueLen; i++ {
 		if q.Peek().(int) != i+3 {
 			t.Error("peek", i, "had value", q.Peek())
@@ -43,11 +43,11 @@ func TestQueueWrapping(t *testing.T) {
 
 func TestQueueLength(t *testing.T) {
 	q := New()
-	
+
 	if q.Length() != 0 {
 		t.Error("empty queue length not 0")
 	}
-	
+
 	for i := 0; i < 1000; i++ {
 		q.Add(i)
 		if q.Length() != i+1 {
@@ -64,7 +64,7 @@ func TestQueueLength(t *testing.T) {
 
 func TestQueueGet(t *testing.T) {
 	q := New()
-	
+
 	for i := 0; i < 1000; i++ {
 		q.Add(i)
 		for j := 0; j < q.Length(); j++ {
@@ -77,7 +77,7 @@ func TestQueueGet(t *testing.T) {
 
 func TestQueueGetNegative(t *testing.T) {
 	q := New()
-	
+
 	for i := 0; i < 1000; i++ {
 		q.Add(i)
 		for j := 1; j <= q.Length(); j++ {
@@ -90,15 +90,15 @@ func TestQueueGetNegative(t *testing.T) {
 
 func TestQueueGetOutOfRangePanics(t *testing.T) {
 	q := New()
-	
+
 	q.Add(1)
 	q.Add(2)
 	q.Add(3)
-	
+
 	assertPanics(t, "should panic when negative index", func() {
 		q.Get(-4)
 	})
-	
+
 	assertPanics(t, "should panic when index greater than length", func() {
 		q.Get(4)
 	})
@@ -106,15 +106,15 @@ func TestQueueGetOutOfRangePanics(t *testing.T) {
 
 func TestQueuePeekOutOfRangePanics(t *testing.T) {
 	q := New()
-	
+
 	//assertPanics(t, "should panic when peeking empty queue", func() {
 	//	q.Peek()
 	//})
 	require.Equal(t, nil, q.Peek())
-	
+
 	q.Add(1)
 	q.Remove()
-	
+
 	//assertPanics(t, "should panic when peeking emptied queue", func() {
 	//	q.Peek()
 	//})
@@ -123,14 +123,14 @@ func TestQueuePeekOutOfRangePanics(t *testing.T) {
 
 func TestQueueRemoveOutOfRangePanics(t *testing.T) {
 	q := New()
-	
+
 	assertPanics(t, "should panic when removing empty queue", func() {
 		q.Remove()
 	})
-	
+
 	q.Add(1)
 	q.Remove()
-	
+
 	assertPanics(t, "should panic when removing emptied queue", func() {
 		q.Remove()
 	})
@@ -142,7 +142,7 @@ func assertPanics(t *testing.T, name string, f func()) {
 			t.Errorf("%s: didn't panic as expected", name)
 		}
 	}()
-	
+
 	f()
 }
 

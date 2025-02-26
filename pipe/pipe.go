@@ -3,7 +3,7 @@ package pipe
 import (
 	"context"
 	"fmt"
-	"github.com/gozelle/async"
+	"github.com/adminium/async"
 	"reflect"
 )
 
@@ -25,11 +25,11 @@ func Run[T any](ctx context.Context, initial *T, runners []Runner[T]) (err error
 		err = fmt.Errorf("no runner")
 		return
 	}
-	
+
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	
+
 	for _, v := range runners {
 		err = v(ctx, initial)
 		if err != nil {

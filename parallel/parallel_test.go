@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gozelle/async/parallel"
-	"github.com/gozelle/atomic"
-	"github.com/gozelle/testify/require"
+	"github.com/adminium/async/parallel"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/atomic"
 )
 
 func TestRun1(t *testing.T) {
