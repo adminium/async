@@ -29,6 +29,14 @@ type Bucket[T any] struct {
 }
 
 func (b *Bucket[T]) Stop() {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	if b.closed {
+		return
+	}
+
+	b.closed = true
 	b.done <- struct{}{}
 }
 
@@ -55,15 +63,15 @@ func (b *Bucket[T]) Len() int {
 // Push 仅当桶处于 closed 状态时会报错
 func (b *Bucket[T]) Push(data T) (err error) {
 
-	if b.closed {
-		err = fmt.Errorf("bucket has closed")
-		return
-	}
-
 	b.lock.Lock()
 	defer func() {
 		b.lock.Unlock()
 	}()
+
+	if b.closed {
+		err = fmt.Errorf("bucket has closed")
+		return
+	}
 
 	b.data = append(b.data, data)
 
@@ -104,16 +112,16 @@ func (b *Bucket[T]) Start() {
 func (b *Bucket[T]) process(timer *time.Timer) {
 
 	b.lock.Lock()
-	defer func() {
-		b.lock.Unlock()
-	}()
+	defer b.lock.Unlock()
 
-	timer.Stop()
-	if b.handler != nil && len(b.data) > 0 {
-		b.handler(append([]T{}, b.data...))
+	data := make([]T, len(b.data))
+	copy(data, b.data)
+	b.data = make([]T, 0)
+
+	if b.handler != nil && len(data) > 0 {
+		b.handler(data)
 	}
 
-	b.data = make([]T, 0)
 	b.now = time.Now()
 	timer.Reset(b.interval)
 }
