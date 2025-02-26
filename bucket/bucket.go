@@ -26,17 +26,10 @@ type Bucket[T any] struct {
 	closed    bool
 	threshold uint
 	now       time.Time
+	once      sync.Once
 }
 
 func (b *Bucket[T]) Stop() {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	if b.closed {
-		return
-	}
-
-	b.closed = true
 	b.done <- struct{}{}
 }
 
@@ -79,34 +72,35 @@ func (b *Bucket[T]) Push(data T) (err error) {
 }
 
 func (b *Bucket[T]) Start() {
+	b.once.Do(func() {
+		defer func() {
+			close(b.done)
+		}()
 
-	defer func() {
-		close(b.done)
-	}()
+		b.closed = false
+		b.now = time.Now()
+		timer := time.NewTimer(b.interval)
+		defer func() {
+			timer.Stop()
+		}()
 
-	b.closed = false
-	b.now = time.Now()
-	timer := time.NewTimer(b.interval)
-	defer func() {
-		timer.Stop()
-	}()
-
-	for {
-		select {
-		case <-b.done:
-			b.closed = true
-			return
-		case <-timer.C:
-			b.process(timer)
-		default:
-			b.lock.Lock()
-			l := len(b.data)
-			b.lock.Unlock()
-			if uint(l) >= b.threshold {
+		for {
+			select {
+			case <-b.done:
+				b.closed = true
+				return
+			case <-timer.C:
 				b.process(timer)
+			default:
+				b.lock.Lock()
+				l := len(b.data)
+				b.lock.Unlock()
+				if uint(l) >= b.threshold {
+					b.process(timer)
+				}
 			}
 		}
-	}
+	})
 }
 
 func (b *Bucket[T]) process(timer *time.Timer) {
