@@ -2,7 +2,9 @@ package bucket
 
 import (
 	"fmt"
+	"github.com/adminium/async"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -27,6 +29,19 @@ type Bucket[T any] struct {
 	threshold uint
 	now       time.Time
 	once      sync.Once
+	log       async.ILogger
+	count     atomic.Int32
+}
+
+func (b *Bucket[T]) SetLog(log async.ILogger) {
+	b.log = log
+}
+
+func (b *Bucket[T]) Infof(template string, args ...interface{}) {
+	if b.log == nil {
+		return
+	}
+	b.log.Infof(template, args...)
 }
 
 func (b *Bucket[T]) Stop() {
@@ -67,6 +82,7 @@ func (b *Bucket[T]) Push(data T) (err error) {
 	}
 
 	b.data = append(b.data, data)
+	b.count.Add(1)
 
 	return
 }
@@ -75,6 +91,8 @@ func (b *Bucket[T]) Start() {
 	b.once.Do(func() {
 		defer func() {
 			close(b.done)
+			b.closed = true
+			b.Infof("close bucket")
 		}()
 
 		b.closed = false
@@ -84,18 +102,16 @@ func (b *Bucket[T]) Start() {
 			timer.Stop()
 		}()
 
+		b.Infof("start bucket, threshold: %d, interval: %s", b.threshold, b.interval)
+
 		for {
 			select {
 			case <-b.done:
-				b.closed = true
 				return
 			case <-timer.C:
 				b.process(timer)
 			default:
-				b.lock.Lock()
-				l := len(b.data)
-				b.lock.Unlock()
-				if uint(l) >= b.threshold {
+				if uint(b.count.Load()) >= b.threshold {
 					b.process(timer)
 				}
 			}
@@ -111,6 +127,7 @@ func (b *Bucket[T]) process(timer *time.Timer) {
 	data := make([]T, len(b.data))
 	copy(data, b.data)
 	b.data = make([]T, 0)
+	b.count.Store(0)
 
 	if b.handler != nil && len(data) > 0 {
 		b.handler(data)
