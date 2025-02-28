@@ -13,6 +13,7 @@ type Handler[T any] func(data []T)
 func NewBucket[T any](threshold uint, interval time.Duration, handler Handler[T]) *Bucket[T] {
 	return &Bucket[T]{
 		data:      make([]T, 0),
+		done:      make(chan struct{}, 1),
 		threshold: threshold,
 		interval:  interval,
 		handler:   handler,
@@ -90,8 +91,8 @@ func (b *Bucket[T]) Push(data T) (err error) {
 func (b *Bucket[T]) Start() {
 	b.once.Do(func() {
 		defer func() {
-			close(b.done)
 			b.closed = true
+			close(b.done)
 			b.Infof("close bucket")
 		}()
 
