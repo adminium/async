@@ -2,18 +2,17 @@ package stream
 
 type listener struct {
 	name    string
-	handler func(event any)
+	handler func(event Event)
 }
 
-type Event struct {
-	Name string
-	Data any
+type Event interface {
+	EventName() string
 }
 
 func NewEventStream(cap int) *EventStream {
 	return &EventStream{
 		events:    make(chan Event, cap),
-		listeners: make(chan *listener),
+		listeners: make(chan *listener, 1024),
 	}
 }
 
@@ -27,14 +26,11 @@ func (p *EventStream) Close() {
 	close(p.listeners)
 }
 
-func (p *EventStream) Emit(name string, data any) {
-	p.events <- Event{
-		Name: name,
-		Data: data,
-	}
+func (p *EventStream) Emit(event Event) {
+	p.events <- event
 }
 
-func (p *EventStream) On(name string, handler func(data any)) {
+func (p *EventStream) On(name string, handler func(event Event)) {
 	p.listeners <- &listener{
 		name:    name,
 		handler: handler,
@@ -54,8 +50,8 @@ func (p *EventStream) Run() {
 			if !ok {
 				return
 			}
-			for _, l := range listeners[e.Name] {
-				l.handler(e.Data)
+			for _, l := range listeners[e.EventName()] {
+				l.handler(e)
 			}
 		}
 	}
