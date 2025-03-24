@@ -14,8 +14,8 @@ type IRunner[T any] interface {
 type Runner[T any] async.Runner[T]
 
 func Run[T any](ctx context.Context, times int, interval time.Duration, runner Runner[T]) (result T, err error) {
-	if times < 1 {
-		err = fmt.Errorf("times expact > 1, got: %d", times)
+	if times < 0 {
+		err = fmt.Errorf("times expact > 0, got: %d", times)
 		return
 	}
 

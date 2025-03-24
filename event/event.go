@@ -23,7 +23,7 @@ func Subscribe(id string, handler func(args ...any)) (seq int) {
 	defer func() {
 		lock.Unlock()
 	}()
-	
+
 	maxSeq++
 	seq = maxSeq
 	ln := &listener{
@@ -40,17 +40,17 @@ func Subscribe(id string, handler func(args ...any)) (seq int) {
 
 // SyncPublish 同步触发事件，若有处理器处理失败，则返回错误
 func SyncPublish(id string, args ...any) (err error) {
-	
+
 	lock.Lock()
 	defer func() {
 		lock.Unlock()
 	}()
-	
+
 	ls, ok := listeners[id]
 	if !ok {
 		return
 	}
-	
+
 	for _, l := range ls {
 		e := catchPanic(func() {
 			l.handler(args...)
@@ -60,7 +60,7 @@ func SyncPublish(id string, args ...any) (err error) {
 			return
 		}
 	}
-	
+
 	return
 }
 
@@ -71,7 +71,7 @@ func AsyncPublish(id string, args ...any) {
 	defer func() {
 		lock.Unlock()
 	}()
-	
+
 	ls, ok := listeners[id]
 	if !ok {
 		return
@@ -87,7 +87,7 @@ func AsyncPublish(id string, args ...any) {
 			})
 		}
 	}(rs)
-	
+
 	return
 }
 
@@ -97,7 +97,7 @@ func Unsubscribe(id string, seq int) {
 	defer func() {
 		lock.Unlock()
 	}()
-	
+
 	ls, ok := listeners[id]
 	if !ok {
 		return
@@ -118,7 +118,7 @@ func catchPanic(f func()) (err any) {
 	defer func() {
 		err = recover()
 		if err != nil {
-			log.Printf("[github.com/gozelle/event] CatchPanic panic: err=%v", err)
+			log.Printf("[github.com/adminium/event] CatchPanic panic: err=%v", err)
 		}
 	}()
 	f()
