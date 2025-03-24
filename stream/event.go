@@ -1,47 +1,48 @@
 package stream
 
-type listener[T any] struct {
+type listener struct {
 	name    string
-	handler func(event T)
-}
-type Event[T any] struct {
-	Name string
-	Data T
+	handler func(event any)
 }
 
-func NewEventStream[T any](cap int) *EventStream[T] {
-	return &EventStream[T]{
-		events:    make(chan Event[T], cap),
-		listeners: make(chan *listener[T]),
+type Event struct {
+	Name string
+	Data any
+}
+
+func NewEventStream(cap int) *EventStream {
+	return &EventStream{
+		events:    make(chan Event, cap),
+		listeners: make(chan *listener),
 	}
 }
 
-type EventStream[T any] struct {
-	events    chan Event[T]
-	listeners chan *listener[T]
+type EventStream struct {
+	events    chan Event
+	listeners chan *listener
 }
 
-func (p *EventStream[T]) Close() {
+func (p *EventStream) Close() {
 	close(p.events)
 	close(p.listeners)
 }
 
-func (p *EventStream[T]) Emit(name string, data T) {
-	p.events <- Event[T]{
+func (p *EventStream) Emit(name string, data any) {
+	p.events <- Event{
 		Name: name,
 		Data: data,
 	}
 }
 
-func (p *EventStream[T]) On(name string, handler func(data T)) {
-	p.listeners <- &listener[T]{
+func (p *EventStream) On(name string, handler func(data any)) {
+	p.listeners <- &listener{
 		name:    name,
 		handler: handler,
 	}
 }
 
-func (p *EventStream[T]) Run() {
-	listeners := make(map[string][]*listener[T])
+func (p *EventStream) Run() {
+	listeners := make(map[string][]*listener)
 	for {
 		select {
 		case l, ok := <-p.listeners:
